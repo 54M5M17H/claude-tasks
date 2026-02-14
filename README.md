@@ -7,10 +7,7 @@ A workflow for managing AI agent tasks using vimwiki. Create tasks as wiki files
 ## Prerequisites
 
 - [vim](https://www.vim.org/) or [neovim](https://neovim.io/)
-- [vimwiki](https://github.com/vimwiki/vimwiki) plugin installed and `g:vimwiki_list` configured in your vim config:
-  ```vim
-  let g:vimwiki_list = [{'path': '~/vimwiki'}]
-  ```
+- [vimwiki](https://github.com/vimwiki/vimwiki) plugin installed
 - [tmux](https://github.com/tmux/tmux) -- tasks launch in new tmux windows, so vim must be running inside a tmux session
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed and authenticated
 
@@ -33,11 +30,6 @@ The launcher script reads `g:vimwiki_list[0].path` from your vim config to find 
 - `wip/` -- When you press `<leader>ai`, the task file moves here automatically. Claude reads and updates the file in this directory as it works.
 - `done/` -- Move completed tasks here with `<leader>mv` for archival.
 
-Create the structure:
-```bash
-mkdir -p ~/vimwiki/{todo,wip,done}
-```
-
 See `examples/` for a sample dashboard and tasks in each stage.
 
 ## Setup
@@ -49,10 +41,20 @@ See `examples/` for a sample dashboard and tasks in each stage.
 
 2. Add to your vim config (`init.vim` or `.vimrc`):
    ```vim
+   " Configure vimwiki with your wiki path
+   let g:vimwiki_list = [{'path': '~/vimwiki'}]
+
+   " Load the task launcher
    source ~/repos/claude-tasks/vimwiki_launcher.vim
    ```
+   The launcher reads `g:vimwiki_list[0].path` to find your wiki, so this must be set before the `source` line.
 
-3. Generate Claude config and paste into `~/.claude/CLAUDE.md`:
+3. Create the directory structure:
+   ```bash
+   mkdir -p ~/vimwiki/{todo,wip,done}
+   ```
+
+4. Generate Claude config and paste into `~/.claude/CLAUDE.md`:
    ```bash
    ./generate-claude-config.sh          # defaults to ~/vimwiki
    ./generate-claude-config.sh ~/wiki   # custom path
