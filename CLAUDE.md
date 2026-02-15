@@ -9,6 +9,8 @@ This repo defines a task management workflow for Claude Code agents using vimwik
 - `templates/task.wiki` — Template auto-loaded when creating new tasks in `todo/`. Defines the fields Claude uses for status reporting.
 - `generate-claude-config.sh` — Generates a Status Reporting config block for `~/.claude/CLAUDE.md` with the user's wiki path and this repo's template path substituted in.
 - `examples/` — Sample wiki files showing the todo/wip/done lifecycle.
+- `hooks/task-status-hook.sh` — Claude Code hook that updates the task file's Status and Last Updated fields when session events fire. Reads `AITASK_FILE` env var set by the launcher.
+- `install-hooks.sh` — Registers the task status hooks in `~/.claude/settings.json`. Idempotent.
 - `README.md` — Setup guide and usage docs.
 
 ## Key design decisions
@@ -26,3 +28,5 @@ This repo defines a task management workflow for Claude Code agents using vimwik
 - **generate-claude-config.sh**: Output must match the format Claude expects in CLAUDE.md. After changes, run the script and verify the output paths are correct.
 - **README.md**: Keep setup steps numbered and in order. The `g:vimwiki_list` config must come before the `source` line in step 2.
 - **examples/**: Keep examples realistic but generic. Don't include personal or company-specific content.
+- **hooks/task-status-hook.sh**: Must always exit 0 to avoid blocking Claude. Must drain stdin. Only writes to the file if `AITASK_FILE` is set and exists.
+- **install-hooks.sh**: Must be idempotent. Must resolve absolute paths dynamically (never hardcode paths).

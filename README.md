@@ -60,7 +60,67 @@ See `examples/` for a sample dashboard and tasks in each stage.
    ./generate-claude-config.sh ~/wiki   # custom path
    ```
 
+5. (Optional) Install Claude Code hooks for automatic status updates:
+   ```bash
+   ./install-hooks.sh
+   ```
+   This registers hooks that automatically update your task file's Status field when Claude events occur (permission requests, failures, session end, etc.). Requires `jq`.
+
 ## How it works
+
+```
+                       ┌──────────────────────────────────────────┐
+                       │              ~/vimwiki/                   │
+                       │                                          │
+                       │  todo/          wip/              done/  │
+                       │  ┌──────┐     ┌──────┐          ┌─────┐ │
+                       │  │ task │     │ task │          │task │ │
+                       │  │ .wiki│     │ .wiki│          │.wiki│ │
+                       │  └──┬───┘     └▲──▲──┘          └─────┘ │
+                       │     │          │  │  ▲                   │
+                       └─────┼──────────┼──┼──┼───────────────────┘
+                             │          │  │  │
+       ┌─────────────────────┘          │  │  │
+       │  <leader>ai                    │  │  │
+       │  moves todo/ -> wip/           │  │  │  reads wip/*.wiki
+       │  opens tmux window             │  │  │  detects stale
+       ▼                                │  │  │  timestamps
+┌─────────────┐    reads task file      │  │  │
+│   Vim +     ├─────────────────────────┘  │  │
+│   Launcher  │                            │  │
+│             │    sets AITASK_FILE env     │  │
+└─────────────┘              │             │  │
+                             │             │  │
+                             ▼             │  │
+                    ┌────────────────┐     │  │
+                    │  Claude Code   │     │  │
+                    │  (tmux window) │     │  │
+                    │                │     │  │
+                    │  reads task    │     │  │
+                    │  instructions  ├─────┤  │  writes status,
+                    │                │     │  │  progress, PR links
+                    └───────┬────────┘     │  │
+                            │              │  │
+                 session events fire       │  │
+                            │              │  │
+                            ▼              │  │
+                    ┌────────────────┐     │  │
+                    │  Hooks         │     │  │
+                    │                │     │  │
+                    │ PermissionReq  ├─────┘  │  updates Status
+                    │ ToolFailure    │        │  + timestamp
+                    │ Stop           │        │
+                    │ TaskCompleted  │        │
+                    │ PreCompact     │        │
+                    │ SessionEnd     │        │
+                    └────────────────┘        │
+                                              │
+                    ┌────────────────┐        │
+                    │  Manager       ├────────┘
+                    │  (optional)    │  monitors wip/,
+                    │                │  alerts on crashed agents
+                    └────────────────┘
+```
 
 Tasks follow a three-stage lifecycle:
 
