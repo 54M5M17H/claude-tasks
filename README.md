@@ -145,24 +145,48 @@ Tasks follow a three-stage lifecycle:
 
 `claude_manager.py` is a terminal dashboard that monitors all active tasks in `wip/`. It runs continuously in its own tmux window and alerts you when tasks need attention.
 
+### Prerequisites
+
+- Python 3.9+ (ships with macOS)
+- tmux (the manager detects agent processes via tmux)
+- No external Python dependencies -- stdlib only
+
+### Installation
+
+The manager ships with this repo -- no separate installation is required. After cloning (step 1 in [Setup](#setup)), the script is ready to use:
+
+```bash
+# Verify the manager is available
+python3 ~/repos/claude-tasks/claude_manager.py --help
+```
+
+To use the `:AIManager` vim command, complete [Setup](#setup) steps 1--2 (clone + vim config).
+
+### Launching the manager
+
+**From vim** (recommended -- opens in a dedicated tmux window):
+```
+:AIManager
+```
+
+**From the terminal:**
+```bash
+python3 ~/repos/claude-tasks/claude_manager.py
+```
+
+**With a custom wiki path:**
+```bash
+python3 ~/repos/claude-tasks/claude_manager.py --wiki-path ~/my-wiki
+```
+
+The manager must be run inside a tmux session to detect agent processes. It refreshes automatically and sends macOS desktop notifications when tasks need attention. Press `q` to exit.
+
 ### What it monitors
 
 - **Blocked/waiting tasks** -- Status contains words like "waiting", "blocked", "paused"
 - **Crashed agents** -- No Claude process found for a task that isn't complete
 - **Stale tasks** -- No wiki file update in the last 10 minutes (configurable)
 - **Completed tasks** -- Status suggests the task is done and should be moved to `done/`
-
-### Running the manager
-
-From vim (opens in a new tmux window):
-```
-:AIManager
-```
-
-Or directly from the terminal:
-```bash
-python3 ~/repos/claude-tasks/claude_manager.py
-```
 
 ### Options
 
@@ -186,11 +210,6 @@ python3 claude_manager.py [--wiki-path PATH] [--interval SECONDS] [--stale-minut
 | `q` | Quit the manager |
 
 Desktop notifications (via macOS Notification Center) fire automatically for tasks that need attention or have stopped running. They deduplicate so you only get alerted once per issue.
-
-### Prerequisites
-
-- Python 3.9+ (ships with macOS)
-- No external dependencies -- stdlib only
 
 ## Customization
 
