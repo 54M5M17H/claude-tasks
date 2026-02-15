@@ -24,7 +24,7 @@ if [ ! -f "$SETTINGS_FILE" ]; then
   exit 1
 fi
 
-EVENTS=("PermissionRequest" "PostToolUseFailure" "Stop" "TaskCompleted" "PreCompact" "SessionEnd")
+EVENTS=("UserPromptSubmit" "PermissionRequest" "PostToolUseFailure" "Stop" "TaskCompleted" "PreCompact" "SessionEnd")
 
 # Read current settings
 SETTINGS=$(cat "$SETTINGS_FILE")
