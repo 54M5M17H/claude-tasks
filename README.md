@@ -69,57 +69,57 @@ See `examples/` for a sample dashboard and tasks in each stage.
 ## How it works
 
 ```
-                          ┌─────────────────────────────────┐
-                          │         ~/vimwiki/               │
-                          │                                  │
-                          │  todo/         wip/       done/  │
-                          │  ┌──────┐    ┌──────┐   ┌─────┐ │
-                          │  │ task │    │ task │   │task │ │
-                          │  │ .wiki│    │ .wiki│   │.wiki│ │
-                          │  └──┬───┘    └▲──▲──┘   └─────┘ │
-                          │     │         │  │               │
-                          └─────┼─────────┼──┼───────────────┘
-                                │         │  │
-          ┌─────────────────────┘         │  │
-          │  <leader>ai                   │  │
-          │  moves todo/ -> wip/          │  │
-          │  opens tmux window            │  │
-          ▼                               │  │
-   ┌─────────────┐    reads task file     │  │
-   │   Vim +     ├────────────────────────┘  │
-   │   Launcher  │                           │
-   │             │    sets AITASK_FILE env    │
-   └─────────────┘              │            │
-                                │            │
-                                ▼            │
-                       ┌────────────────┐    │
-                       │  Claude Code   │    │
-                       │  (tmux window) │    │
-                       │                │    │
-                       │  reads task    │    │
-                       │  instructions  ├────┤  writes status,
-                       │                │    │  progress, PR links
-                       └───────┬────────┘    │
-                               │             │
-                    session events fire       │
-                               │             │
-                               ▼             │
-                       ┌────────────────┐    │
-                       │  Hooks         │    │
-                       │                │    │
-                       │ PermissionReq  ├────┘  updates Status
-                       │ ToolFailure    │       + timestamp
-                       │ Stop           │
-                       │ TaskCompleted  │
-                       │ PreCompact     │
-                       │ SessionEnd     │
-                       └────────────────┘
-
-                       ┌────────────────┐
-                       │  Manager       │     monitors wip/
-                       │  (optional)    │◄──  detects stale
-                       │                │     timestamps,
-                       └────────────────┘     crashed agents
+                       ┌──────────────────────────────────────────┐
+                       │              ~/vimwiki/                   │
+                       │                                          │
+                       │  todo/          wip/              done/  │
+                       │  ┌──────┐     ┌──────┐          ┌─────┐ │
+                       │  │ task │     │ task │          │task │ │
+                       │  │ .wiki│     │ .wiki│          │.wiki│ │
+                       │  └──┬───┘     └▲──▲──┘          └─────┘ │
+                       │     │          │  │  ▲                   │
+                       └─────┼──────────┼──┼──┼───────────────────┘
+                             │          │  │  │
+       ┌─────────────────────┘          │  │  │
+       │  <leader>ai                    │  │  │
+       │  moves todo/ -> wip/           │  │  │  reads wip/*.wiki
+       │  opens tmux window             │  │  │  detects stale
+       ▼                                │  │  │  timestamps
+┌─────────────┐    reads task file      │  │  │
+│   Vim +     ├─────────────────────────┘  │  │
+│   Launcher  │                            │  │
+│             │    sets AITASK_FILE env     │  │
+└─────────────┘              │             │  │
+                             │             │  │
+                             ▼             │  │
+                    ┌────────────────┐     │  │
+                    │  Claude Code   │     │  │
+                    │  (tmux window) │     │  │
+                    │                │     │  │
+                    │  reads task    │     │  │
+                    │  instructions  ├─────┤  │  writes status,
+                    │                │     │  │  progress, PR links
+                    └───────┬────────┘     │  │
+                            │              │  │
+                 session events fire       │  │
+                            │              │  │
+                            ▼              │  │
+                    ┌────────────────┐     │  │
+                    │  Hooks         │     │  │
+                    │                │     │  │
+                    │ PermissionReq  ├─────┘  │  updates Status
+                    │ ToolFailure    │        │  + timestamp
+                    │ Stop           │        │
+                    │ TaskCompleted  │        │
+                    │ PreCompact     │        │
+                    │ SessionEnd     │        │
+                    └────────────────┘        │
+                                              │
+                    ┌────────────────┐        │
+                    │  Manager       ├────────┘
+                    │  (optional)    │  monitors wip/,
+                    │                │  alerts on crashed agents
+                    └────────────────┘
 ```
 
 Tasks follow a three-stage lifecycle:
