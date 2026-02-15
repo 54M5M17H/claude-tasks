@@ -60,6 +60,12 @@ See `examples/` for a sample dashboard and tasks in each stage.
    ./generate-claude-config.sh ~/wiki   # custom path
    ```
 
+5. (Optional) Install Claude Code hooks for automatic status updates:
+   ```bash
+   ./install-hooks.sh
+   ```
+   This registers hooks that automatically update your task file's Status field when Claude events occur (permission requests, failures, session end, etc.). Requires `jq`.
+
 ## How it works
 
 Tasks follow a three-stage lifecycle:
