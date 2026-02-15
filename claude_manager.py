@@ -25,6 +25,7 @@ RESET = "\033[0m"
 
 COMPLETION_WORDS = ("done", "complete", "finished")
 BLOCKED_WORDS = ("waiting for", "waiting on", "blocked", "needs review", "paused", "stuck")
+HOOK_ATTENTION_STATUSES = ("permissionrequest", "posttoolusefailure", "stop", "sessionend")
 
 
 @dataclass
@@ -45,19 +46,24 @@ class TaskState:
 
 
 def parse_timestamp(raw: str) -> Optional[datetime]:
-    """Parse timestamps like 'Saturday 14th February 19:30:55'."""
+    """Parse timestamps like 'Saturday 14th February 19:30:55' or 'Saturday 14 February 2026 19:30:55'."""
     raw = raw.strip()
     if not raw or raw.startswith("[") or len(raw) < 10:
         return None
     cleaned = re.sub(r"(\d+)(?:st|nd|rd|th)", r"\1", raw)
-    try:
-        dt = datetime.strptime(cleaned, "%A %d %B %H:%M:%S")
-    except ValueError:
+    for fmt in ("%A %d %B %Y %H:%M:%S", "%A %d %B %H:%M:%S"):
+        try:
+            dt = datetime.strptime(cleaned, fmt)
+            break
+        except ValueError:
+            continue
+    else:
         return None
-    now = datetime.now()
-    dt = dt.replace(year=now.year)
-    if dt > now:
-        dt = dt.replace(year=now.year - 1)
+    if "%Y" not in fmt:
+        now = datetime.now()
+        dt = dt.replace(year=now.year)
+        if dt > now:
+            dt = dt.replace(year=now.year - 1)
     return dt
 
 
@@ -176,7 +182,10 @@ def classify_alerts(
     task.alert_reasons.clear()
     status_low = task.status.lower()
     task.is_completed = any(w in status_low for w in COMPLETION_WORDS)
-    task.is_blocked = any(w in status_low for w in BLOCKED_WORDS)
+    task.is_blocked = (
+        any(w in status_low for w in BLOCKED_WORDS)
+        or status_low in HOOK_ATTENTION_STATUSES
+    )
     # Tmux checks
     if task.tmux_window is not None:
         task.tmux_window_exists = any(
