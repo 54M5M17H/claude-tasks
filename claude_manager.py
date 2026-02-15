@@ -141,19 +141,16 @@ def check_process_in_list(filepath: str, ps_output: str) -> bool:
     return False
 
 
-def switch_tmux_window(window: str, windows: list[str]) -> bool:
-    """Switch to the tmux window matching the given number."""
-    for entry in windows:
-        if entry.endswith(f":{window}"):
-            try:
-                subprocess.run(
-                    ["tmux", "select-window", "-t", entry],
-                    capture_output=True, timeout=5,
-                )
-                return True
-            except (FileNotFoundError, subprocess.TimeoutExpired):
-                return False
-    return False
+def switch_tmux_window(window: str) -> bool:
+    """Switch to the tmux window matching the given number in the current session."""
+    try:
+        result = subprocess.run(
+            ["tmux", "select-window", "-t", f":{window}"],
+            capture_output=True, timeout=5,
+        )
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
 
 
 def _escape_applescript(s: str) -> str:
@@ -339,8 +336,7 @@ def main() -> None:
                 elif ch.isdigit() and in_tmux:
                     idx = int(ch) - 1
                     if 0 <= idx < len(tasks) and tasks[idx].tmux_window:
-                        windows = get_tmux_windows()
-                        switch_tmux_window(tasks[idx].tmux_window, windows)
+                        switch_tmux_window(tasks[idx].tmux_window)
     except (KeyboardInterrupt, SystemExit):
         pass
     finally:
