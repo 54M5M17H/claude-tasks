@@ -63,11 +63,20 @@ function! VimwikiAITask() abort
   endif
 
   let l:winname = tolower(substitute(expand('%:t:r'), ' ', '-', 'g'))[:20]
-  let l:cmd = 'tmux new-window -n ' . shellescape(l:winname) . ' -e ' . shellescape('AITASK_FILE=' . l:filepath) . ' ''claude "Read the file $AITASK_FILE for your task instructions. Use $AITASK_FILE as your wip file to report progress updates to."; exec "$SHELL"'''
-  call system(l:cmd)
+
+  " Create window detached, capture its index
+  let l:win_idx = trim(system('tmux new-window -d -n ' . shellescape(l:winname) . ' -e ' . shellescape('AITASK_FILE=' . l:filepath) . ' -PF "#{window_index}"'))
   if v:shell_error
     echoerr 'AITask: failed to create tmux window'
+    return
   endif
+
+  " Write the window index to the task file before Claude reads it
+  call system('sed -i "" "s/^\*\*Tmux Window\*\*: .*/\*\*Tmux Window\*\*: ' . l:win_idx . '/" ' . shellescape(l:filepath))
+
+  " Start Claude in the window, then switch to it
+  call system('tmux send-keys -t :' . l:win_idx . ' ''claude "Read the file $AITASK_FILE for your task instructions. Use $AITASK_FILE as your wip file to report progress updates to."; exec "$SHELL"'' Enter')
+  call system('tmux select-window -t :' . l:win_idx)
 endfunction
 
 " :VimwikiMv <dest_dir> -- move current wiki file to a different directory
