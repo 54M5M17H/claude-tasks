@@ -5,7 +5,7 @@ This repo defines a task management workflow for Claude Code agents using vimwik
 ## Repo structure
 
 - `vimwiki_launcher.vim` — Vim functions that integrate vimwiki with Claude Code via tmux. Reads `g:vimwiki_list[0].path` at load time to find the user's wiki. Captures the tmux window index at creation and writes it to the task file before Claude starts.
-- `claude_manager.py` — Terminal dashboard that monitors `wip/` tasks. Detects blocked, stale, crashed, and completed agents. Also detects hook-written statuses (`Stop`, `PermissionRequest`, `PostToolUseFailure`, `SessionEnd`) as needing attention. Runs in its own tmux window via `:AIManager`.
+- `claude_manager.py` — Terminal dashboard that monitors `wip/` tasks. Detects blocked, stale, crashed, and completed agents. Also detects hook-written statuses (`Stop`, `PermissionRequest`, `PostToolUseFailure`, `SessionEnd`) as needing attention. Transient hook states (Stop, PostToolUseFailure) are only flagged as needing attention when the agent process is not running. Runs in its own tmux window via `:AIManager`.
 - `templates/task.wiki` — Template auto-loaded when creating new tasks in `todo/`. Defines the fields Claude uses for status reporting.
 - `generate-claude-config.sh` — Generates a Status Reporting config block for `~/.claude/CLAUDE.md` with the user's wiki path and this repo's template path substituted in.
 - `examples/` — Sample wiki files showing the todo/wip/done lifecycle.

@@ -179,17 +179,21 @@ def classify_alerts(
     task.alert_reasons.clear()
     status_low = task.status.lower()
     task.is_completed = any(w in status_low for w in COMPLETION_WORDS)
-    task.is_blocked = (
-        any(w in status_low for w in BLOCKED_WORDS)
-        or status_low in HOOK_ATTENTION_STATUSES
-    )
+
+    is_user_blocked = any(w in status_low for w in BLOCKED_WORDS)
+    is_hook_attention = status_low in HOOK_ATTENTION_STATUSES
+
     # Tmux checks
     if task.tmux_window is not None:
         task.tmux_window_exists = any(
             e.endswith(f":{task.tmux_window}") for e in tmux_windows
         )
-    # Process check
+    # Process check (before is_blocked so we can factor it in)
     task.has_active_process = check_process_in_list(task.filepath, ps_output)
+
+    # Blocked: user-set statuses always count; hook states only when agent stopped
+    task.is_blocked = is_user_blocked or (is_hook_attention and not task.has_active_process)
+
     # Alerts in priority order
     if task.is_blocked:
         task.alert_reasons.append(f"NEEDS ATTENTION (status: {task.status})")
@@ -199,8 +203,9 @@ def classify_alerts(
         age = (datetime.now() - task.last_updated).total_seconds()
         if age > stale_minutes * 60:
             task.is_stale = True
-            mins = int(age // 60)
-            task.alert_reasons.append(f"STALE ({mins}m since last update)")
+            if not task.is_blocked:
+                mins = int(age // 60)
+                task.alert_reasons.append(f"STALE ({mins}m since last update)")
     elif task.last_updated is None and task.status != "?":
         task.is_stale = False  # unknown, don't flag
     if task.is_completed:
