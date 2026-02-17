@@ -1,4 +1,4 @@
-# claude-tasks
+# claude-command-centre
 
 ## What this is
 
@@ -36,7 +36,7 @@ See `examples/` for a sample dashboard and tasks in each stage.
 
 1. Clone the repo:
    ```bash
-   git clone <repo-url> ~/repos/claude-tasks
+   git clone <repo-url> ~/repos/claude-command-centre
    ```
 
 2. Add to your vim config (`init.vim` or `.vimrc`):
@@ -45,7 +45,7 @@ See `examples/` for a sample dashboard and tasks in each stage.
    let g:vimwiki_list = [{'path': '~/vimwiki'}]
 
    " Load the task launcher
-   source ~/repos/claude-tasks/vimwiki_launcher.vim
+   source ~/repos/claude-command-centre/vimwiki_launcher.vim
    ```
    The launcher reads `g:vimwiki_list[0].path` to find your wiki, so this must be set before the `source` line.
 
@@ -157,7 +157,7 @@ The manager ships with this repo -- no separate installation is required. After 
 
 ```bash
 # Verify the manager is available
-python3 ~/repos/claude-tasks/claude_manager.py --help
+python3 ~/repos/claude-command-centre/claude_manager.py --help
 ```
 
 To use the `:AIManager` vim command, complete [Setup](#setup) steps 1--2 (clone + vim config).
@@ -171,12 +171,12 @@ To use the `:AIManager` vim command, complete [Setup](#setup) steps 1--2 (clone 
 
 **From the terminal:**
 ```bash
-python3 ~/repos/claude-tasks/claude_manager.py
+python3 ~/repos/claude-command-centre/claude_manager.py
 ```
 
 **With a custom wiki path:**
 ```bash
-python3 ~/repos/claude-tasks/claude_manager.py --wiki-path ~/my-wiki
+python3 ~/repos/claude-command-centre/claude_manager.py --wiki-path ~/my-wiki
 ```
 
 The manager must be run inside a tmux session to detect agent processes. It refreshes automatically and sends macOS desktop notifications when tasks need attention. Press `q` to exit.

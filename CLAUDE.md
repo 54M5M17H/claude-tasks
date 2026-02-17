@@ -1,4 +1,4 @@
-# claude-tasks
+# claude-command-centre
 
 This repo defines a task management workflow for Claude Code agents using vimwiki.
 
